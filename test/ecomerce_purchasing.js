@@ -10,4 +10,18 @@ contract("EcommercePurchasing", function (/* accounts */) {
     await EcommercePurchasing.deployed();
     return assert.isTrue(true);
   });
+
+    it("length of products should equal to 3", async function () {
+        let instance = await EcommercePurchasing.deployed();
+        let products = await instance.getProducts();
+        console.log(products);
+        assert.equal(products.length, 3);
+    });
+
+    it ("get balance of owner", async function () {
+        let instance = await EcommercePurchasing.deployed();
+        let balance = await instance.getBalance();
+        console.log("balance: ", balance);
+        assert.equal(balance, 0);
+    });
 });
