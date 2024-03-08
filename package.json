@@ -4,5 +4,16 @@
   "main": "index.js",
   "repository": "https://github.com/bos-hieu/ecommerce-purchasing.git",
   "author": "Trung Hieu Le <le5998@saskpolytech.ca>",
-  "license": "MIT"
+  "license": "MIT",
+  "scripts": {
+    "test": "truffle test",
+    "compile": "truffle compile",
+    "deploy": "truffle deploy"
+  },
+  "dependencies": {
+    "solc": "^0.8.24"
+  },
+  "devDependencies": {
+    "ganache": "^7.9.2"
+  }
 }

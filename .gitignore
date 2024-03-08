@@ -1,1 +1,12 @@
+# JetBrains IDE
 .idea
+
+# node_modules
+node_modules
+
+# package manager cache files
+yarn.lock
+package-lock.json
+
+# truffle build
+build
