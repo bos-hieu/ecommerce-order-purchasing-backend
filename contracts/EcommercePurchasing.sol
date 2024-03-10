@@ -1,75 +1,130 @@
+/*
+  @title EcommercePurchasing
+  @author: Le, Trung Hieu
+  @date: March 10, 2024
+  @notice: This contract allows customers to purchase products from a retailer.
+  @dev: The contract is implemented using Solidity version greater than 0.8.13
+  @class: Introduction to Smart Contract - Assignment 2
+
+  This contract is for educational purposes only. It is not intended for use in a production environment.
+  The aim of this contract is to not only complete the assignment but also try to implement as many of Solidity's features as possible, including
+  the use of libraries, interfaces, and abstract contracts.
+  There are some points that should be considered before reviewing the code:
+  - The conventions of Solidity are followed by the style guide, which is mentioned in this link: https://docs.soliditylang.org/en/latest/style-guide.html.
+  - Because there is no double type in Solidity, the uint256 type is used to represent any double type that is defined in Assignment 1.
+  - Because there is no print function in Solidity, all print statements in Assignment 1 are replaced by the return statement.
+
+  I am looking forward to receiving your feedback. Thank you for your time and consideration.
+*/
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.13;
 
-
-// reference: https://docs.soliditylang.org/en/latest/style-guide.html
-// Orders contract is used to manage the orders
-contract Orders {
-    mapping(string => Order) private _orders;
-    uint8 orderIDSequence = 1;
-    string constant ORDER_ID_PREFIX = "order_id_";
-
-    // OrderStatus is an enum type that represents the status of an order
-    enum OrderStatus {
-        PaymentPending,
-        PaymentFailed,
-        New,
-        Canceled,
-        PartialRefunded
-    }
-
-    // Order is a struct type that represents the information of an order
-    struct Order {
-        string id;
-        string productID;
-        uint256 amount; // double in frontend
-        address payable customerAddress;
-        OrderStatus status;
-        uint256 refundedAmount; // double in frontend
-    }
-
-    // uint8ToString is a private function that converts a uint8 to a string
-    // @param number (UINT8) - The number to be converted
-    // @return (STRING) - The string of the number
-    function uint8ToString(uint8 number) private pure returns (string memory) {
+// Utils is a library that contains utility functions for the EcommercePurchasing system
+// The functions include uint8ToString, concatTwoStrings, and compareTwoStrings
+// reference: https://www.geeksforgeeks.org/solidity-libraries/
+library Utils {
+    // uint8ToString is a utility function that converts a uint8 to a string
+    // @param number (uint8) - The number to be converted
+    // @return (string) - The string of the number
+    function uint8ToString(uint8 number) internal pure returns (string memory) {
         // Convert uint8 to ASCII (single-character string)
+        // In ASCII, the digits 0-9 have the code points 48-57
+        // So, to convert a digit to its ASCII code, we can add 48 to the digit
         bytes1 b = bytes1(uint8(number) + 48);
 
         // Convert ASCII to string
         return string(abi.encodePacked(b));
     }
 
-    // concatTwoStrings is a private function that concatenates two strings
-    // @param a (STRING) - The first string
-    // @param b (STRING) - The second string
-    // @return (STRING) - The concatenated string
+    // concatTwoStrings is a utility function that concatenates two strings
+    // @param a (string) - The first string
+    // @param b (string) - The second string
+    // @return (string) - The concatenated string
     function concatTwoStrings(string memory a, string memory b) internal pure returns (string memory){
         return string(abi.encodePacked(a, b));
+    }
+
+    // compareTwoStrings is a utility function that compares two strings
+    // @param a (string) - The first string
+    // @param b (string) - The second string
+    // @return (bool) - The result of the comparison
+    // reference: https://www.educative.io/answers/how-to-compare-two-strings-in-solidity
+    function compareTwoStrings(string memory a, string memory b) internal pure returns (bool) {
+        if (bytes(a).length != bytes(b).length) {
+            return false;
+        }
+        return keccak256(abi.encodePacked(a)) == keccak256(abi.encodePacked(b));
+    }
+}
+
+
+// Orders contract is used to manage the orders
+contract Orders {
+    // _orders is a private mapping that stores the orders
+    mapping(string => Order) private _orders;
+
+    // orderIDSequence is a private variable that stores the sequence of order id
+    uint8 orderIDSequence = 1;
+
+    // ORDER_ID_PREFIX is a private string constant that represents the prefix of an order id
+    string constant ORDER_ID_PREFIX = "order_id_";
+
+    // OrderStatus is an enum type that represents the status of an order
+    enum OrderStatus {
+        PaymentPending, // default status
+        PaymentFailed, // status when payment failed
+        New, // status when a new order is created
+        Canceled, // status when an order is canceled
+        PartialRefunded // status when an order is partially refunded
+    }
+
+    // Order is a struct type that represents the information of an order
+    struct Order {
+        string id; // order id
+        string productID; // product id
+        uint256 amount; // the amount of the order, in this case, it is the price of the product.
+        address payable customerAddress; // the customer address
+        OrderStatus status; // the status of the order
+        uint256 refundedAmount; // the refunded amount of the order
     }
 
     // generateOrderID is a private function that generates an order id
     // @return (STRING) - The order id
     function generateOrderID() private returns (string memory) {
-        string memory orderIDSequenceStr = uint8ToString(orderIDSequence);
-        string memory newOrderID = concatTwoStrings(ORDER_ID_PREFIX, orderIDSequenceStr);
+        // Convert orderIDSequence to string
+        string memory orderIDSequenceStr = Utils.uint8ToString(orderIDSequence);
+
+        // Concatenate ORDER_ID_PREFIX and orderIDSequenceStr to create the order id
+        // For example, if orderIDSequence is 1, then the order id will be "order_id_1"
+        string memory newOrderID = Utils.concatTwoStrings(ORDER_ID_PREFIX, orderIDSequenceStr);
+
+        // Increment orderIDSequence for the next order
         orderIDSequence++;
+
         return newOrderID;
     }
 
-    // addOrderToOrders is a private function that adds an order to the _orders
+    // addOrderToOrders is a internal function that adds an order to the _orders
     // @param order (ORDER) - The order to be added
     function addOrderToOrders(Order memory order) internal {
         _orders[order.id] = order;
     }
 
-    // getOrder is a private function that gets an order from the _orders
+    // getOrder is a internal function that gets an order from the _orders
     function getOrder(string memory orderID)
     internal
     view
     returns (Order memory)
     {
+        // Get the order from the _orders
         Order memory order = _orders[orderID];
+
+        // Check if the order is found
+        // The require function is used to check if the condition is true. If the condition is false, then the function
+        // will stop and revert the transaction as well as return the defined error message.
+        // For example, if the order is not found, then the function will stop and return the error message "Order is not found"
         require(bytes(order.id).length > 0, "Order is not found");
+
         return order;
     }
 
@@ -100,6 +155,10 @@ contract Orders {
     internal
     {
         Order storage order = _orders[orderID];
+
+        // Update the status of the order
+        // The storage keyword is used to store the value in the storage of the contract. Therefore, the value will be
+        // updated in the _orders.
         order.status = newStatus;
     }
 }
@@ -109,11 +168,11 @@ contract Orders {
 contract Products {
     // Product is a struct type that represents the information of a product
     struct Product {
-        string id;
-        string name;
-        string description;
-        string image;
-        uint256 price; // double in frontend
+        string id; // the id of the product
+        string name; // the name of the product
+        string description; // the description of the product
+        string image; // the image link of the product
+        uint256 price; // the price of the product
     }
 
     // listProducts is a private variable that stores the list of products
@@ -131,21 +190,21 @@ contract Products {
             "Product 1",
             "Description 1",
             "image_1",
-            1e17 // in wei, is equal to 0.1 ether
+            1e18 // in wei, is equal to 1 ether
         );
         listProducts[1] = Product(
             "product_id_2",
             "Product 2",
             "Description 2",
             "image_2",
-            2e17 // in wei, is equal to 0.2 ether
+            2e18 // in wei, is equal to 2 ether
         );
         listProducts[2] = Product(
             "product_id_3",
             "Product 3",
             "Description 3",
             "image_3",
-            3e17 // in wei, is equal to 0.3 ether
+            3e18 // in wei, is equal to 3 ether
         );
     }
 
@@ -158,14 +217,12 @@ contract Products {
     returns (Product memory)
     {
         for (uint256 i = 0; i < listProducts.length; i++) {
-            if (
-                keccak256(abi.encodePacked(listProducts[i].id)) ==
-                keccak256(abi.encodePacked(productID))
-            ) {
+            if (Utils.compareTwoStrings(listProducts[i].id, productID)) {
                 return listProducts[i];
             }
         }
 
+        // Return an empty product if the product is not found
         return Product("", "", "", "", 0);
     }
 }
@@ -185,7 +242,7 @@ abstract contract EcommercePurchasingAbstract is Products {
     ) external payable virtual returns (string memory);
 
     // cancelOrder is a function that is used to cancel an order
-    function cancelOrder(string memory) public virtual returns (string memory);
+    function cancelOrder(string memory) public payable virtual returns (string memory);
 
     // issueRefund is a function that is used to issue a refund
     function issueRefund(string memory, uint256)
@@ -206,7 +263,10 @@ Products,
 Orders,
 EcommercePurchasingAbstract
 {
-
+    // retailer is a private variable that stores the retailer address
+    // The retailer is the address that receives the payment from the customer when an order is placed successfully and
+    // issues a refund when an order is canceled or partially refunded.
+    // The retailer is set by the setRetailer function.
     address payable retailer;
 
     // setRetailer is an implementation of the setRetailer function of EcommercePurchasingAbstract
@@ -214,7 +274,6 @@ EcommercePurchasingAbstract
     function setRetailer(address payable initRetailer) public override {
         retailer = initRetailer;
     }
-
 
     // getProducts is an implementation of the getProducts function of EcommercePurchasingAbstract
     // @return (Product[3]) - The list of products
@@ -234,8 +293,15 @@ EcommercePurchasingAbstract
     ) external payable override returns (string memory) {
         // Step 1: Check if the product is valid.
         Product memory product = getProductFromListProducts(productID);
-        if (product.id == "") {
+        if (Utils.compareTwoStrings(product.id, "")) {
             return "Product is invalid";
+        }
+
+        // Step 1.1: Check if the amount is equal to the price of the product.
+        // Note: this step is not mentioned in the assignment 1, but I think it is necessary to check if the amount is
+        // equal to the price of the product. Therefore, I added this step to make the code more secure.
+        if (product.price != amount) {
+            return "Amount is not equal to price of product";
         }
 
         // Step 2: Check if the customer has enough balance.
@@ -255,7 +321,7 @@ EcommercePurchasingAbstract
         }
 
         updateOrderStatus(order.id, OrderStatus.New);
-        return concatTwoStrings(
+        return Utils.concatTwoStrings(
             "You have successfully purchased an order with id ",
             order.id
         );
@@ -264,14 +330,14 @@ EcommercePurchasingAbstract
     // cancelOrder is an implementation of the cancelOrder function of EcommercePurchasingAbstract
     // @param orderID (string) - The order id
     // @return (string) - The message of the result
-    function cancelOrder(string memory orderID) public override returns (string memory) {
+    function cancelOrder(string memory orderID) public payable override returns (string memory) {
         // Step 1: Get Order info from order id.
         Order memory order = getOrder(orderID);
 
         // Step 2: Check if the order is already canceled.
-                if (order.status == OrderStatus.Canceled) {
-                    return "This order is already canceled";
-                }
+        if (order.status == OrderStatus.Canceled) {
+            return "This order is already canceled";
+        }
 
         // Step 3: Proceed to cancel the order.
         bool canCancelOrder = (order.status == OrderStatus.New ||
@@ -291,13 +357,12 @@ EcommercePurchasingAbstract
 
         // Step 3.3: Issue a refund and update the order status to canceled.
         (string memory refundMessage, bool isRefundSuccess) = issueRefund(orderID, refund_amount);
-        if (isRefundSuccess){
+        if (isRefundSuccess) {
             updateOrderStatus(order.id, OrderStatus.Canceled);
             return "You successfully canceled your order";
         }
         return refundMessage;
     }
-
 
     // issueRefund is an implementation of the issueRefund function of EcommercePurchasingAbstract
     // @param orderID (string) - The order id
@@ -322,11 +387,11 @@ EcommercePurchasingAbstract
                 abi.encodePacked(maxRefundAmount)
             );
             return (
-                concatTwoStrings(
-                    "Refund amount is greater than: ",
-                    maxRefundAmountStr
-                ),
-               isRefundSuccess
+                Utils.concatTwoStrings(
+                "Refund amount is greater than: ",
+                maxRefundAmountStr
+            ),
+                isRefundSuccess
             );
         }
 
@@ -354,8 +419,16 @@ EcommercePurchasingAbstract
     }
 }
 
+
 // EcommercePurchasing is the main contract of the EcommercePurchasing system
 // It inherits from Products and Orders
+// I used the contract EcommercePurchasingImplement to implement the functions of EcommercePurchasingAbstract
+// This helps to separate the interface and the implementation of the EcommercePurchasing system
+// Therefore, ensuring the encapsulation of the business logic. Anyone outside of the EcommercePurchasing system
+// will only see the interface of the EcommercePurchasing system, not the implementation. Therefore, the implementation
+// can be changed without affecting the interface and the other parts of the system.
+// The EcommercePurchasing system is implemented in the
+// EcommercePurchasingImplement contract.
 contract EcommercePurchasing is Products, Orders {
     // ecommercePurchasing is an instance of EcommercePurchasingAbstract that is used to call the functions of EcommercePurchasingImplement
     EcommercePurchasingAbstract ecommercePurchasing =
@@ -382,6 +455,9 @@ contract EcommercePurchasing is Products, Orders {
     payable
     returns (string memory)
     {
+        // the {value: msg.value} is used to send the value of the transaction to the placeOrder function of
+        // ecommercePurchasing. Without this, the transaction maybe failed or the transaction will be sent to address's
+        // contract instead of the address's retailer.
         string memory message = ecommercePurchasing.placeOrder{value: msg.value}(
             productId,
             msg.value,
@@ -394,21 +470,26 @@ contract EcommercePurchasing is Products, Orders {
     // It calls the cancelOrder function of ecommercePurchasing
     // @param orderID (string) - The order id
     // @return (string) - The message of the result
-    function cancelOrder(string memory orderID) public returns (string memory) {
-        return ecommercePurchasing.cancelOrder(orderID);
+    function cancelOrder(string memory orderID) public payable returns (string memory) {
+        // the {value: msg.value} is used to send the value of the transaction to the cancelOrder function of
+        // ecommercePurchasing. Without this, the transaction maybe failed or the transaction will be sent to address's
+        // contract instead of the address's customer.
+        return ecommercePurchasing.cancelOrder{value: msg.value}(orderID);
     }
 
     // issueRefund is a public function that is used to issue a refund
     // It calls the issueRefund function of ecommercePurchasing
     // @param orderID (string) - The order id
-    // @param refundAmount (uint256) - The refund amount
     // @return (string) - The message of the result
-    function issueRefund(string memory orderID, uint256 refundAmount)
+    function issueRefund(string memory orderID)
     public
     payable
     returns (string memory)
     {
-        ( string memory refundMessage, ) = ecommercePurchasing.issueRefund(orderID, refundAmount);
+        // the {value: msg.value} is used to send the value of the transaction to the issueRefund function of
+        // ecommercePurchasing. Without this, the transaction maybe failed or the transaction will be sent to address's
+        // contract instead of the address's customer.
+        (string memory refundMessage,) = ecommercePurchasing.issueRefund{value: msg.value}(orderID, msg.value);
         return refundMessage;
     }
 }
