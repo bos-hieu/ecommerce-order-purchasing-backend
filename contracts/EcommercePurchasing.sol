@@ -390,12 +390,12 @@ contract EcommercePurchasing is Products, Orders {
     payable
     returns (Order memory)
     {
-        return
-            ecommercePurchasing.placeOrder{value: msg.value}(
+        Order memory order = ecommercePurchasing.placeOrder{value: msg.value}(
             product_id,
             msg.value,
             payable(msg.sender)
         );
+        return order;
     }
 
     function cancelOrder(string memory order_id) public {

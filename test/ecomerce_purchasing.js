@@ -1,4 +1,4 @@
-const web3 = require("web3");
+const Web3 = require("web3");
 const EcommercePurchasing = artifacts.require("EcommercePurchasing");
 
 /*
@@ -24,7 +24,7 @@ contract("EcommercePurchasing", function (/* accounts */) {
         let products = await instance.getProducts();
         let product = products[0];
         let result = await instance.placeOrder(product.id, {
-            value: web3.utils.toWei(product.price, "wei"),
+            value: Web3.utils.toWei(product.price, "wei"),
             from: "0xFdE41Cde2114265Ff1E51d2BdA535b261163cbD9"
         });
         console.log(result);
