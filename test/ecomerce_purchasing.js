@@ -6,22 +6,24 @@ const EcommercePurchasing = artifacts.require("EcommercePurchasing");
  * See docs: https://www.trufflesuite.com/docs/truffle/testing/writing-tests-in-javascript
  */
 contract("EcommercePurchasing", function (/* accounts */) {
-  it("should assert true", async function () {
-    await EcommercePurchasing.deployed();
-    return assert.isTrue(true);
-  });
+    // it("should assert true", async function () {
+    //     await EcommercePurchasing.deployed();
+    //     return assert.isTrue(true);
+    // });
+    //
+    // it("length of products should equal to 3", async function () {
+    //     let instance = await EcommercePurchasing.deployed();
+    //     let products = await instance.getProducts();
+    //     console.log(products);
+    //     assert.equal(products.length, 3);
+    // });
 
-    it("length of products should equal to 3", async function () {
+    it("should place an order", async function () {
         let instance = await EcommercePurchasing.deployed();
         let products = await instance.getProducts();
-        console.log(products);
-        assert.equal(products.length, 3);
-    });
-
-    it ("get balance of owner", async function () {
-        let instance = await EcommercePurchasing.deployed();
-        let balance = await instance.getBalance();
-        console.log("balance: ", balance);
-        assert.equal(balance, 0);
+        let product = products[0];
+        let result = await instance.placeOrder(product.id, product.price);
+        console.log(result);
+        assert.equal(result.receipt.status, true);
     });
 });

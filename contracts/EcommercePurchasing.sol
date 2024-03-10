@@ -96,17 +96,23 @@ contract Products {
 abstract contract EcommercePurchasingInterface is Products {
   function getProducts() public virtual view returns (Product[3] memory);
 
-  function placeOrder(string memory product_id, uint amount) public virtual payable;
+  function placeOrder(string memory, uint, address payable) public virtual payable;
 
-  function cancelOrder(string memory order_id) public virtual;
+  function cancelOrder(string memory) public virtual;
 
-  function issueRefund(string memory order_id, uint refund_amount) public virtual payable returns (bool);
+  function issueRefund(string memory, uint) public virtual payable returns (bool);
 
   function getBalance(address) public virtual view returns (uint);
 }
 
 
 contract EcommercePurchasingImplement is Orders, Products, EcommercePurchasingInterface {
+  address payable retailerAddress;
+
+  constructor(address payable _retailerAddress){
+    retailerAddress = retailerAddress;
+  }
+
   // Function: getProducts
   //    # The getProducts function returns the list of products
   //    RETURNS Product[3]
@@ -152,7 +158,7 @@ contract EcommercePurchasingImplement is Orders, Products, EcommercePurchasingIn
   //        PRINT "You successfully purchased an order with order id";
   //      END
   //    END
-  function placeOrder(string memory product_id, uint amount) public payable override {
+  function placeOrder(string memory product_id, uint amount, address payable customer) public payable override {
     Product memory product = getProductFromListProducts(product_id);
     //        if (bytes(product.id).length == 0) {
     //            return;
@@ -162,16 +168,16 @@ contract EcommercePurchasingImplement is Orders, Products, EcommercePurchasingIn
     //        if (owner.balance < amount) {
     //            return;
     //        }
-    require(msg.sender.balance >= amount, "Not enough balance");
+    require(customer.balance >= amount, "Not enough balance");
 
-    Order memory order = createOrder(product_id, amount, msg.sender);
+    Order memory order = createOrder(product_id, amount, customer);
     addOrderToOrders(order);
-    payable(msg.sender).transfer(amount);
-    if (!payable(msg.sender).send(amount)) {
-      updateOrderStatus(order.id, OrderStatus.PaymentFailed);
-    } else {
-      updateOrderStatus(order.id, order.status = OrderStatus.New);
-    }
+    customer.transfer(amount);
+//    if (!payable(customer).send(amount)) {
+//      updateOrderStatus(order.id, OrderStatus.PaymentFailed);
+//    } else {
+//      updateOrderStatus(order.id, order.status = OrderStatus.New);
+//    }
   }
 
   // Function: cancelOrder
@@ -276,7 +282,7 @@ contract EcommercePurchasing is Products {
   EcommercePurchasingInterface ecommercePurchasing;
 
   constructor() {
-    ecommercePurchasing = new EcommercePurchasingImplement();
+    ecommercePurchasing = new EcommercePurchasingImplement(payable(msg.sender));
   }
 
   function getProducts() public view returns (Product[3] memory) {
@@ -284,7 +290,7 @@ contract EcommercePurchasing is Products {
   }
 
   function placeOrder(string memory product_id, uint amount) public payable {
-    ecommercePurchasing.placeOrder(product_id, amount);
+    ecommercePurchasing.placeOrder(product_id, amount, payable(msg.sender));
   }
 
   function cancelOrder(string memory order_id) public {
