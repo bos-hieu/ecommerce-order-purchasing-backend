@@ -1,6 +1,6 @@
 /*
   @class: CCMP 603 - Introduction to Smart Contracts - Assignment 2
-  @title E-commerce Order Purchasing Smart Contract
+  @title: E-commerce Order Purchasing Smart Contract
   @member: Le, Trung Hieu
   @date: March 10, 2024
   @notice: This contract allows customers to purchase products from a retailer.
