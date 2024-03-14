@@ -78,10 +78,10 @@ contract Orders {
     mapping(string => Order) private _orders;
 
     // orderIDSequence is a private variable that stores the sequence of order id
-    uint8 orderIDSequence = 1;
+    uint8 private orderIDSequence = 1;
 
     // ORDER_ID_PREFIX is a private string constant that represents the prefix of an order id
-    string constant ORDER_ID_PREFIX = "order_id_";
+    string private constant ORDER_ID_PREFIX = "order_id_";
 
     // OrderStatus is an enum type that represents the status of an order
     enum OrderStatus {
@@ -233,6 +233,7 @@ contract Products {
     returns (Product memory)
     {
         for (uint256 i = 0; i < listProducts.length; i++) {
+            // Check if the product id is equal to the productID
             if (Utils.compareTwoStrings(listProducts[i].id, productID)) {
                 return listProducts[i];
             }
@@ -296,6 +297,13 @@ EcommerceOrderPurchasingAbstract
     // The retailer is set by the setRetailer function.
     address payable retailer;
 
+    // onlyRetailer is a modifier that checks if the caller is the retailer
+    // Note: this step is not mentioned in the assignment 1, but I think it is necessary to check if the caller is the retailer.
+    modifier onlyRetailer() {
+        require(msg.sender == retailer, "Only retailer can call this function");
+        _; // This is used to continue the execution of the function if the condition is true
+    }
+
     // setRetailer is an implementation of the setRetailer function of EcommerceOrderPurchasingAbstract
     // @param initRetailer (address) - The retailer address to be set
     function setRetailer(address payable initRetailer) public override {
@@ -320,6 +328,7 @@ EcommerceOrderPurchasingAbstract
     ) external payable override returns (string memory) {
         // Step 1: Check if the product is valid.
         Product memory product = getProductFromListProducts(productID);
+        // If the product.id is equal to "", then the product is invalid.
         if (Utils.compareTwoStrings(product.id, "")) {
             return "Product is invalid";
         }
@@ -362,6 +371,7 @@ EcommerceOrderPurchasingAbstract
     public
     payable
     override
+    onlyRetailer
     returns (string memory)
     {
         // Step 1: Get Order info from order id.
@@ -407,6 +417,7 @@ EcommerceOrderPurchasingAbstract
     public
     payable
     override
+    onlyRetailer
     returns (string memory, bool)
     {
         // Step 1: Get order info from order id.
@@ -462,19 +473,19 @@ EcommerceOrderPurchasingAbstract
 // Therefore, ensuring the encapsulation of the business logic.
 contract EcommerceOrderPurchasing is Products, Orders {
     // EcommerceOrderPurchasing is an instance of EcommerceOrderPurchasingAbstract that is used to call the functions of EcommerceOrderPurchasingImplement
-    EcommerceOrderPurchasingAbstract EcommerceOrderPurchasing =
+    EcommerceOrderPurchasingAbstract ecommerceOrderPurchasing =
     new EcommerceOrderPurchasingImplement();
 
     constructor() {
         // Set the retailer from the deployer of the contract
-        EcommerceOrderPurchasing.setRetailer(payable(msg.sender));
+        ecommerceOrderPurchasing.setRetailer(payable(msg.sender));
     }
 
     // getProducts is a public function that returns the list of products
     // It calls the getProducts function of EcommerceOrderPurchasing
     // @return (Product[3]) - The list of products
     function getProducts() public view returns (Product[3] memory) {
-        return EcommerceOrderPurchasing.getProducts();
+        return ecommerceOrderPurchasing.getProducts();
     }
 
     // placeOrder is a public function that is used to place an order
@@ -489,7 +500,7 @@ contract EcommerceOrderPurchasing is Products, Orders {
         // the {value: msg.value} is used to send the value of the transaction to the placeOrder function of
         // EcommerceOrderPurchasing. Without this, the transaction maybe failed or the transaction will be sent to address's
         // contract instead of the address's retailer.
-        string memory message = EcommerceOrderPurchasing.placeOrder{
+        string memory message = ecommerceOrderPurchasing.placeOrder{
                 value: msg.value
             }(productId, msg.value, payable(msg.sender));
         return message;
@@ -507,7 +518,7 @@ contract EcommerceOrderPurchasing is Products, Orders {
         // the {value: msg.value} is used to send the value of the transaction to the cancelOrder function of
         // EcommerceOrderPurchasing. Without this, the transaction maybe failed or the transaction will be sent to address's
         // contract instead of the address's customer.
-        return EcommerceOrderPurchasing.cancelOrder{value: msg.value}(orderID);
+        return ecommerceOrderPurchasing.cancelOrder{value: msg.value}(orderID);
     }
 
     // issueRefund is a public function that is used to issue a refund
@@ -522,7 +533,7 @@ contract EcommerceOrderPurchasing is Products, Orders {
         // the {value: msg.value} is used to send the value of the transaction to the issueRefund function of
         // EcommerceOrderPurchasing. Without this, the transaction maybe failed or the transaction will be sent to address's
         // contract instead of the address's customer.
-        (string memory refundMessage, ) = EcommerceOrderPurchasing.issueRefund{
+        (string memory refundMessage, ) = ecommerceOrderPurchasing.issueRefund{
                 value: msg.value
             }(orderID, msg.value);
         return refundMessage;
