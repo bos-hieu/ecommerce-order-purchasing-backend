@@ -1,21 +1,21 @@
 /*
-  @title Ecommerce Purchasing Smart Contract
-  @author: Le, Trung Hieu
+  @class: CCMP 603 - Introduction to Smart Contracts - Assignment 2
+  @title E-commerce Order Purchasing Smart Contract
+  @member: Le, Trung Hieu
   @date: March 10, 2024
   @notice: This contract allows customers to purchase products from a retailer.
   @dev: The contract is implemented using Solidity version greater than 0.8.13
-  @class: Introduction to Smart Contract - Assignment 2
 
   This contract is for educational purposes only. It is not intended for use in a production environment.
   The aim of this contract is to not only complete the assignment but also try to implement as many of Solidity's features as possible, including
   the use of libraries, interfaces, and abstract contracts.
   There are some points that should be considered before reviewing the code:
-  - The EcommercePurchasing is the main contract of the EcommercePurchasing system.
-  - The EcommercePurchasingAbstract is an abstract contract that defines the functions of EcommercePurchasing.
-  - The EcommercePurchasingImplement is a contract that implements the functions of EcommercePurchasing.
+  - The EcommerceOrderPurchasing is the main contract of the EcommerceOrderPurchasing system.
+  - The EcommerceOrderPurchasingAbstract is an abstract contract that defines the functions of EcommerceOrderPurchasing.
+  - The EcommerceOrderPurchasingImplement is a contract that implements the functions of EcommerceOrderPurchasing.
   - The Products contract is used to manage the products.
   - The Orders contract is used to manage the orders.
-  - The library Utils contains utility functions for the EcommercePurchasing system.
+  - The library Utils contains utility functions for the EcommerceOrderPurchasing system.
   - Because there is no double type in Solidity, the uint256 type is used to represent any double type that is defined in Assignment 1.
   - Because there is no print function in Solidity, all print statements in Assignment 1 are replaced by the return statement.
   - The number of products is fixed to 3, and the product information is hardcoded in the contract.
@@ -26,7 +26,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.13;
 
-// Utils is a library that contains utility functions for the EcommercePurchasing system
+// Utils is a library that contains utility functions for the EcommerceOrderPurchasing system
 // The functions include uint8ToString, concatTwoStrings, and compareTwoStrings
 // reference: https://www.geeksforgeeks.org/solidity-libraries/
 library Utils {
@@ -243,9 +243,9 @@ contract Products {
     }
 }
 
-// EcommercePurchasingAbstract is an interface that defines the functions of EcommercePurchasing
+// EcommerceOrderPurchasingAbstract is an interface that defines the functions of EcommerceOrderPurchasing
 // It inherits from Products
-abstract contract EcommercePurchasingAbstract is Products {
+abstract contract EcommerceOrderPurchasingAbstract is Products {
     // getProducts is a function that returns the list of products
     // @return (Product[3]) - The list of products
     function getProducts() public view virtual returns (Product[3] memory);
@@ -283,12 +283,12 @@ abstract contract EcommercePurchasingAbstract is Products {
     function setRetailer(address payable) public virtual;
 }
 
-// EcommercePurchasingImplement is a contract that implements the functions of EcommercePurchasing
-// It inherits from Products, Orders, and EcommercePurchasingAbstract
-contract EcommercePurchasingImplement is
+// EcommerceOrderPurchasingImplement is a contract that implements the functions of EcommerceOrderPurchasing
+// It inherits from Products, Orders, and EcommerceOrderPurchasingAbstract
+contract EcommerceOrderPurchasingImplement is
 Products,
 Orders,
-EcommercePurchasingAbstract
+EcommerceOrderPurchasingAbstract
 {
     // retailer is a private variable that stores the retailer address
     // The retailer is the address that receives the payment from the customer when an order is placed successfully and
@@ -296,19 +296,19 @@ EcommercePurchasingAbstract
     // The retailer is set by the setRetailer function.
     address payable retailer;
 
-    // setRetailer is an implementation of the setRetailer function of EcommercePurchasingAbstract
+    // setRetailer is an implementation of the setRetailer function of EcommerceOrderPurchasingAbstract
     // @param initRetailer (address) - The retailer address to be set
     function setRetailer(address payable initRetailer) public override {
         retailer = initRetailer;
     }
 
-    // getProducts is an implementation of the getProducts function of EcommercePurchasingAbstract
+    // getProducts is an implementation of the getProducts function of EcommerceOrderPurchasingAbstract
     // @return (Product[3]) - The list of products
     function getProducts() public view override returns (Product[3] memory) {
         return listProducts;
     }
 
-    // placeOrder is an implementation of the placeOrder function of EcommercePurchasingAbstract
+    // placeOrder is an implementation of the placeOrder function of EcommerceOrderPurchasingAbstract
     // @param productID (string) - The product id
     // @param amount (uint256) - The amount of the product
     // @param customer (address) - The customer address
@@ -355,7 +355,7 @@ EcommercePurchasingAbstract
         );
     }
 
-    // cancelOrder is an implementation of the cancelOrder function of EcommercePurchasingAbstract
+    // cancelOrder is an implementation of the cancelOrder function of EcommerceOrderPurchasingAbstract
     // @param orderID (string) - The order id
     // @return (string) - The message of the result
     function cancelOrder(string memory orderID)
@@ -400,7 +400,7 @@ EcommercePurchasingAbstract
         return refundMessage;
     }
 
-    // issueRefund is an implementation of the issueRefund function of EcommercePurchasingAbstract
+    // issueRefund is an implementation of the issueRefund function of EcommerceOrderPurchasingAbstract
     // @param orderID (string) - The order id
     // @param refundAmount (uint256) - The refund amount
     function issueRefund(string memory orderID, uint256 refundAmount)
@@ -455,30 +455,30 @@ EcommercePurchasingAbstract
     }
 }
 
-// EcommercePurchasing is the main contract of the EcommercePurchasing system.
+// EcommerceOrderPurchasing is the main contract of the EcommerceOrderPurchasing system.
 // It inherits from Products and Orders.
-// I used the contract EcommercePurchasingImplement to implement the functions of EcommercePurchasingAbstract.
-// This helps to separate the interface and the implementation of the EcommercePurchasing system.
+// I used the contract EcommerceOrderPurchasingImplement to implement the functions of EcommerceOrderPurchasingAbstract.
+// This helps to separate the interface and the implementation of the EcommerceOrderPurchasing system.
 // Therefore, ensuring the encapsulation of the business logic.
-contract EcommercePurchasing is Products, Orders {
-    // ecommercePurchasing is an instance of EcommercePurchasingAbstract that is used to call the functions of EcommercePurchasingImplement
-    EcommercePurchasingAbstract ecommercePurchasing =
-    new EcommercePurchasingImplement();
+contract EcommerceOrderPurchasing is Products, Orders {
+    // EcommerceOrderPurchasing is an instance of EcommerceOrderPurchasingAbstract that is used to call the functions of EcommerceOrderPurchasingImplement
+    EcommerceOrderPurchasingAbstract EcommerceOrderPurchasing =
+    new EcommerceOrderPurchasingImplement();
 
     constructor() {
         // Set the retailer from the deployer of the contract
-        ecommercePurchasing.setRetailer(payable(msg.sender));
+        EcommerceOrderPurchasing.setRetailer(payable(msg.sender));
     }
 
     // getProducts is a public function that returns the list of products
-    // It calls the getProducts function of ecommercePurchasing
+    // It calls the getProducts function of EcommerceOrderPurchasing
     // @return (Product[3]) - The list of products
     function getProducts() public view returns (Product[3] memory) {
-        return ecommercePurchasing.getProducts();
+        return EcommerceOrderPurchasing.getProducts();
     }
 
     // placeOrder is a public function that is used to place an order
-    // It calls the placeOrder function of ecommercePurchasing
+    // It calls the placeOrder function of EcommerceOrderPurchasing
     // @param productId (string) - The product id
     // @return (string) - The message of the result
     function placeOrder(string memory productId)
@@ -487,16 +487,16 @@ contract EcommercePurchasing is Products, Orders {
     returns (string memory)
     {
         // the {value: msg.value} is used to send the value of the transaction to the placeOrder function of
-        // ecommercePurchasing. Without this, the transaction maybe failed or the transaction will be sent to address's
+        // EcommerceOrderPurchasing. Without this, the transaction maybe failed or the transaction will be sent to address's
         // contract instead of the address's retailer.
-        string memory message = ecommercePurchasing.placeOrder{
+        string memory message = EcommerceOrderPurchasing.placeOrder{
                 value: msg.value
             }(productId, msg.value, payable(msg.sender));
         return message;
     }
 
     // cancelOrder is a public function that is used to cancel an order
-    // It calls the cancelOrder function of ecommercePurchasing
+    // It calls the cancelOrder function of EcommerceOrderPurchasing
     // @param orderID (string) - The order id
     // @return (string) - The message of the result
     function cancelOrder(string memory orderID)
@@ -505,13 +505,13 @@ contract EcommercePurchasing is Products, Orders {
     returns (string memory)
     {
         // the {value: msg.value} is used to send the value of the transaction to the cancelOrder function of
-        // ecommercePurchasing. Without this, the transaction maybe failed or the transaction will be sent to address's
+        // EcommerceOrderPurchasing. Without this, the transaction maybe failed or the transaction will be sent to address's
         // contract instead of the address's customer.
-        return ecommercePurchasing.cancelOrder{value: msg.value}(orderID);
+        return EcommerceOrderPurchasing.cancelOrder{value: msg.value}(orderID);
     }
 
     // issueRefund is a public function that is used to issue a refund
-    // It calls the issueRefund function of ecommercePurchasing
+    // It calls the issueRefund function of EcommerceOrderPurchasing
     // @param orderID (string) - The order id
     // @return (string) - The message of the result
     function issueRefund(string memory orderID)
@@ -520,9 +520,9 @@ contract EcommercePurchasing is Products, Orders {
     returns (string memory)
     {
         // the {value: msg.value} is used to send the value of the transaction to the issueRefund function of
-        // ecommercePurchasing. Without this, the transaction maybe failed or the transaction will be sent to address's
+        // EcommerceOrderPurchasing. Without this, the transaction maybe failed or the transaction will be sent to address's
         // contract instead of the address's customer.
-        (string memory refundMessage, ) = ecommercePurchasing.issueRefund{
+        (string memory refundMessage, ) = EcommerceOrderPurchasing.issueRefund{
                 value: msg.value
             }(orderID, msg.value);
         return refundMessage;
