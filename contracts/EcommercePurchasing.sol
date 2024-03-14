@@ -1,5 +1,5 @@
 /*
-  @title EcommercePurchasing
+  @title Ecommerce Purchasing Smart Contract
   @author: Le, Trung Hieu
   @date: March 10, 2024
   @notice: This contract allows customers to purchase products from a retailer.
@@ -10,9 +10,16 @@
   The aim of this contract is to not only complete the assignment but also try to implement as many of Solidity's features as possible, including
   the use of libraries, interfaces, and abstract contracts.
   There are some points that should be considered before reviewing the code:
-  - The conventions of Solidity are followed by the style guide, which is mentioned in this link: https://docs.soliditylang.org/en/latest/style-guide.html.
+  - The EcommercePurchasing is the main contract of the EcommercePurchasing system.
+  - The EcommercePurchasingAbstract is an abstract contract that defines the functions of EcommercePurchasing.
+  - The EcommercePurchasingImplement is a contract that implements the functions of EcommercePurchasing.
+  - The Products contract is used to manage the products.
+  - The Orders contract is used to manage the orders.
+  - The library Utils contains utility functions for the EcommercePurchasing system.
   - Because there is no double type in Solidity, the uint256 type is used to represent any double type that is defined in Assignment 1.
   - Because there is no print function in Solidity, all print statements in Assignment 1 are replaced by the return statement.
+  - The number of products is fixed to 3, and the product information is hardcoded in the contract.
+  - The retailer is set by the deployer of the contract.
 
   I am looking forward to receiving your feedback. Thank you for your time and consideration.
 */
@@ -40,7 +47,11 @@ library Utils {
     // @param a (string) - The first string
     // @param b (string) - The second string
     // @return (string) - The concatenated string
-    function concatTwoStrings(string memory a, string memory b) internal pure returns (string memory){
+    function concatTwoStrings(string memory a, string memory b)
+    internal
+    pure
+    returns (string memory)
+    {
         return string(abi.encodePacked(a, b));
     }
 
@@ -49,14 +60,17 @@ library Utils {
     // @param b (string) - The second string
     // @return (bool) - The result of the comparison
     // reference: https://www.educative.io/answers/how-to-compare-two-strings-in-solidity
-    function compareTwoStrings(string memory a, string memory b) internal pure returns (bool) {
+    function compareTwoStrings(string memory a, string memory b)
+    internal
+    pure
+    returns (bool)
+    {
         if (bytes(a).length != bytes(b).length) {
             return false;
         }
         return keccak256(abi.encodePacked(a)) == keccak256(abi.encodePacked(b));
     }
 }
-
 
 // Orders contract is used to manage the orders
 contract Orders {
@@ -96,7 +110,10 @@ contract Orders {
 
         // Concatenate ORDER_ID_PREFIX and orderIDSequenceStr to create the order id
         // For example, if orderIDSequence is 1, then the order id will be "order_id_1"
-        string memory newOrderID = Utils.concatTwoStrings(ORDER_ID_PREFIX, orderIDSequenceStr);
+        string memory newOrderID = Utils.concatTwoStrings(
+            ORDER_ID_PREFIX,
+            orderIDSequenceStr
+        );
 
         // Increment orderIDSequence for the next order
         orderIDSequence++;
@@ -163,7 +180,6 @@ contract Orders {
     }
 }
 
-
 // Products contract is used to manage the products
 contract Products {
     // Product is a struct type that represents the information of a product
@@ -186,18 +202,18 @@ contract Products {
     // setListProducts is a private function that sets the list of products
     function setListProducts() private {
         listProducts[0] = Product(
-            "product_id_1",
-            "Product 1",
-            "Description 1",
-            "image_1",
-            1e18 // in wei, is equal to 1 ether
+            "product_id_1", // product id
+            "Product 1", // product name
+            "Description 1", // product description
+            "image_1", // product image
+            1e18 // product price in wei, is equal to 1 ether
         );
         listProducts[1] = Product(
-            "product_id_2",
-            "Product 2",
-            "Description 2",
-            "image_2",
-            2e18 // in wei, is equal to 2 ether
+            "product_id_2", // product id
+            "Product 2", // product name
+            "Description 2", // product description
+            "image_2", // product image
+            2e18 // product price in wei, is equal to 2 ether
         );
         listProducts[2] = Product(
             "product_id_3",
@@ -227,14 +243,18 @@ contract Products {
     }
 }
 
-
-// EcommercePurchasingInterface is an interface that defines the functions of EcommercePurchasing
+// EcommercePurchasingAbstract is an interface that defines the functions of EcommercePurchasing
 // It inherits from Products
 abstract contract EcommercePurchasingAbstract is Products {
     // getProducts is a function that returns the list of products
+    // @return (Product[3]) - The list of products
     function getProducts() public view virtual returns (Product[3] memory);
 
     // placeOrder is a function that is used to place an order
+    // @param productID (string) - The product id
+    // @param amount (uint256) - The amount of order, in this case, it is the price of the product
+    // @param customer (address) - The customer address
+    // @return (string) - The message of the result
     function placeOrder(
         string memory,
         uint256,
@@ -242,9 +262,17 @@ abstract contract EcommercePurchasingAbstract is Products {
     ) external payable virtual returns (string memory);
 
     // cancelOrder is a function that is used to cancel an order
-    function cancelOrder(string memory) public payable virtual returns (string memory);
+    // @param orderID (string) - The order id
+    // @return (string) - The message of the result
+    function cancelOrder(string memory)
+    public
+    payable
+    virtual
+    returns (string memory);
 
     // issueRefund is a function that is used to issue a refund
+    // @param orderID (string) - The order id
+    // @param refundAmount (uint256) - The refund amount
     function issueRefund(string memory, uint256)
     public
     payable
@@ -254,7 +282,6 @@ abstract contract EcommercePurchasingAbstract is Products {
     // setRetailer is a function that is used to set the retailer
     function setRetailer(address payable) public virtual;
 }
-
 
 // EcommercePurchasingImplement is a contract that implements the functions of EcommercePurchasing
 // It inherits from Products, Orders, and EcommercePurchasingAbstract
@@ -321,7 +348,8 @@ EcommercePurchasingAbstract
         }
 
         updateOrderStatus(order.id, OrderStatus.New);
-        return Utils.concatTwoStrings(
+        return
+            Utils.concatTwoStrings(
             "You have successfully purchased an order with id ",
             order.id
         );
@@ -330,7 +358,12 @@ EcommercePurchasingAbstract
     // cancelOrder is an implementation of the cancelOrder function of EcommercePurchasingAbstract
     // @param orderID (string) - The order id
     // @return (string) - The message of the result
-    function cancelOrder(string memory orderID) public payable override returns (string memory) {
+    function cancelOrder(string memory orderID)
+    public
+    payable
+    override
+    returns (string memory)
+    {
         // Step 1: Get Order info from order id.
         Order memory order = getOrder(orderID);
 
@@ -356,7 +389,10 @@ EcommercePurchasingAbstract
         }
 
         // Step 3.3: Issue a refund and update the order status to canceled.
-        (string memory refundMessage, bool isRefundSuccess) = issueRefund(orderID, refund_amount);
+        (string memory refundMessage, bool isRefundSuccess) = issueRefund(
+            orderID,
+            refund_amount
+        );
         if (isRefundSuccess) {
             updateOrderStatus(order.id, OrderStatus.Canceled);
             return "You successfully canceled your order";
@@ -414,21 +450,16 @@ EcommercePurchasingAbstract
     payable
     returns (bool)
     {
-        (bool sent,) = to.call{value: value}("");
+        (bool sent, ) = to.call{value: value}("");
         return sent;
     }
 }
 
-
-// EcommercePurchasing is the main contract of the EcommercePurchasing system
-// It inherits from Products and Orders
-// I used the contract EcommercePurchasingImplement to implement the functions of EcommercePurchasingAbstract
-// This helps to separate the interface and the implementation of the EcommercePurchasing system
-// Therefore, ensuring the encapsulation of the business logic. Anyone outside of the EcommercePurchasing system
-// will only see the interface of the EcommercePurchasing system, not the implementation. Therefore, the implementation
-// can be changed without affecting the interface and the other parts of the system.
-// The EcommercePurchasing system is implemented in the
-// EcommercePurchasingImplement contract.
+// EcommercePurchasing is the main contract of the EcommercePurchasing system.
+// It inherits from Products and Orders.
+// I used the contract EcommercePurchasingImplement to implement the functions of EcommercePurchasingAbstract.
+// This helps to separate the interface and the implementation of the EcommercePurchasing system.
+// Therefore, ensuring the encapsulation of the business logic.
 contract EcommercePurchasing is Products, Orders {
     // ecommercePurchasing is an instance of EcommercePurchasingAbstract that is used to call the functions of EcommercePurchasingImplement
     EcommercePurchasingAbstract ecommercePurchasing =
@@ -458,11 +489,9 @@ contract EcommercePurchasing is Products, Orders {
         // the {value: msg.value} is used to send the value of the transaction to the placeOrder function of
         // ecommercePurchasing. Without this, the transaction maybe failed or the transaction will be sent to address's
         // contract instead of the address's retailer.
-        string memory message = ecommercePurchasing.placeOrder{value: msg.value}(
-            productId,
-            msg.value,
-            payable(msg.sender)
-        );
+        string memory message = ecommercePurchasing.placeOrder{
+                value: msg.value
+            }(productId, msg.value, payable(msg.sender));
         return message;
     }
 
@@ -470,7 +499,11 @@ contract EcommercePurchasing is Products, Orders {
     // It calls the cancelOrder function of ecommercePurchasing
     // @param orderID (string) - The order id
     // @return (string) - The message of the result
-    function cancelOrder(string memory orderID) public payable returns (string memory) {
+    function cancelOrder(string memory orderID)
+    public
+    payable
+    returns (string memory)
+    {
         // the {value: msg.value} is used to send the value of the transaction to the cancelOrder function of
         // ecommercePurchasing. Without this, the transaction maybe failed or the transaction will be sent to address's
         // contract instead of the address's customer.
@@ -489,7 +522,9 @@ contract EcommercePurchasing is Products, Orders {
         // the {value: msg.value} is used to send the value of the transaction to the issueRefund function of
         // ecommercePurchasing. Without this, the transaction maybe failed or the transaction will be sent to address's
         // contract instead of the address's customer.
-        (string memory refundMessage,) = ecommercePurchasing.issueRefund{value: msg.value}(orderID, msg.value);
+        (string memory refundMessage, ) = ecommercePurchasing.issueRefund{
+                value: msg.value
+            }(orderID, msg.value);
         return refundMessage;
     }
 }

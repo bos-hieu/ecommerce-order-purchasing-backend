@@ -12,12 +12,12 @@ contract("EcommercePurchasing", function (/* accounts */) {
     //     return assert.isTrue(true);
     // });
     //
-    // it("length of products should equal to 3", async function () {
-    //     let instance = await EcommercePurchasing.deployed();
-    //     let products = await instance.getProducts();
-    //     console.log(products);
-    //     assert.equal(products.length, 3);
-    // });
+    it("length of products should equal to 3", async function () {
+        let instance = await EcommercePurchasing.deployed();
+        let products = await instance.getProducts();
+        console.log(products);
+        assert.equal(products.length, 3);
+    });
 
     it("should place an order", async function () {
         let instance = await EcommercePurchasing.deployed();
