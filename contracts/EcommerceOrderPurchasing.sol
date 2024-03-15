@@ -297,13 +297,6 @@ EcommerceOrderPurchasingAbstract
     // The retailer is set by the setRetailer function.
     address payable retailer;
 
-    // onlyRetailer is a modifier that checks if the caller is the retailer
-    // Note: this step is not mentioned in the assignment 1, but I think it is necessary to check if the caller is the retailer.
-    modifier onlyRetailer() {
-        require(msg.sender == retailer, "Only retailer can call this function");
-        _; // This is used to continue the execution of the function if the condition is true
-    }
-
     // setRetailer is an implementation of the setRetailer function of EcommerceOrderPurchasingAbstract
     // @param initRetailer (address) - The retailer address to be set
     function setRetailer(address payable initRetailer) public override {
@@ -371,7 +364,6 @@ EcommerceOrderPurchasingAbstract
     public
     payable
     override
-    onlyRetailer
     returns (string memory)
     {
         // Step 1: Get Order info from order id.
@@ -417,7 +409,6 @@ EcommerceOrderPurchasingAbstract
     public
     payable
     override
-    onlyRetailer
     returns (string memory, bool)
     {
         // Step 1: Get order info from order id.
@@ -506,8 +497,9 @@ contract EcommerceOrderPurchasing is Products, Orders {
         return message;
     }
 
-    // cancelOrder is a public function that is used to cancel an order
-    // It calls the cancelOrder function of EcommerceOrderPurchasing
+    // cancelOrder is a public function that is used to cancel an order.
+    // It calls the cancelOrder function of EcommerceOrderPurchasing.
+    // This function should be called by the retailer.
     // @param orderID (string) - The order id
     // @return (string) - The message of the result
     function cancelOrder(string memory orderID)
@@ -521,8 +513,9 @@ contract EcommerceOrderPurchasing is Products, Orders {
         return ecommerceOrderPurchasing.cancelOrder{value: msg.value}(orderID);
     }
 
-    // issueRefund is a public function that is used to issue a refund
-    // It calls the issueRefund function of EcommerceOrderPurchasing
+    // issueRefund is a public function that is used to issue a refund.
+    // It calls the issueRefund function of EcommerceOrderPurchasing.
+    // This function should be called by the retailer.
     // @param orderID (string) - The order id
     // @return (string) - The message of the result
     function issueRefund(string memory orderID)
