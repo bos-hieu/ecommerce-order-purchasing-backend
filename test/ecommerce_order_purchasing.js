@@ -1,5 +1,5 @@
 const Web3 = require("web3");
-const EcommercePurchasing = artifacts.require("EcommercePurchasing");
+const EcommercePurchasing = artifacts.require("EcommerceOrderPurchasing");
 
 /*
  * uncomment accounts to access the test accounts made available by the
@@ -7,11 +7,6 @@ const EcommercePurchasing = artifacts.require("EcommercePurchasing");
  * See docs: https://www.trufflesuite.com/docs/truffle/testing/writing-tests-in-javascript
  */
 contract("EcommercePurchasing", function (/* accounts */) {
-    // it("should assert true", async function () {
-    //     await EcommercePurchasing.deployed();
-    //     return assert.isTrue(true);
-    // });
-    //
     it("length of products should equal to 3", async function () {
         let instance = await EcommercePurchasing.deployed();
         let products = await instance.getProducts();
