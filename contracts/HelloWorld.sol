@@ -13,7 +13,7 @@ contract HelloWorld {
 //    }
 
     // A public function that accepts a string argument and updates the `message` storage variable.
-    function setMessage(string memory newMessage) private {
+    function setMessage(string memory newMessage) public {
         message = newMessage;
     }
 
