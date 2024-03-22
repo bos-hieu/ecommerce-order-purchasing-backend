@@ -6,7 +6,8 @@
   "scripts": {
     "test": "truffle test",
     "compile": "truffle compile",
-    "deploy": "truffle deploy",
+    "deploy local": "truffle migrate --network development",
+    "deploy sepolia": "truffle migrate --network sepolia",
     "networks": "truffle networks"
   },
   "dependencies": {
