@@ -42,7 +42,7 @@
  */
 
 require('dotenv').config();
-const { MNEMONIC, PROJECT_ID } = process.env;
+const { MNEMONIC, API_URL } = process.env;
 
 const HDWalletProvider = require('@truffle/hdwallet-provider');
 
@@ -70,7 +70,7 @@ module.exports = {
             network_id: "5777"     // Any network (default: none)
         },
         sepolia: {
-            provider: () => new HDWalletProvider(MNEMONIC, `https://sepolia.infura.io/v3/${PROJECT_ID}`),
+            provider: () => new HDWalletProvider(MNEMONIC, API_URL),
             network_id: 11155111 // Sepolia's id
         }
         //
