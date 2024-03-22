@@ -36,8 +36,3 @@ truffle compile
 ```
 truffle migrate --network development
 ```
-
-## Testing
-```
-truffle test
-```

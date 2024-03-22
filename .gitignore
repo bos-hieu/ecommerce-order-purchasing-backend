@@ -1,6 +1,8 @@
 # JetBrains IDE
 .idea
 
-# package manager cache files
-
+# Environment variables
 *.env
+
+# Node modules
+node_modules
