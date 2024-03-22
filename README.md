@@ -26,13 +26,6 @@ npm install -g truffle
 npm install
 ```
 
-#### Step 5: Create .env file in the root directory
-By copy .env.example and rename it to .env. Then fill in the following information:
-```
-MNEMONIC="your-metamask-seed-phrase"
-API_URL="https://sepolia.infura.io/v3/your-infura-api-key"
-```
-
 ## Compile smart contract
 ```
 truffle compile
@@ -42,10 +35,6 @@ truffle compile
 #### Ganache (default)
 ```
 truffle migrate --network development
-```
-#### Sepolia Ethereum Testnet
-```
-truffle migrate --network sepolia
 ```
 
 ## Testing
