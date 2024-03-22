@@ -14,16 +14,16 @@
 - Create a new account and import the first account from Ganache
 - Switch to the local network
 
-#### Step 1: Install truffle
+#### Step 3: Install truffle
 ```
 npm install -g truffle
 ```
-#### Step 3: Install dependencies
+#### Step 4: Install dependencies
 ```
 npm install
 ```
 
-#### Step 4: Create .env file in the root directory
+#### Step 5: Create .env file in the root directory
 By copy .env.example and rename it to .env. Then fill in the following information:
 ```
 MNEMONIC="your-metamask-seed-phrase"
