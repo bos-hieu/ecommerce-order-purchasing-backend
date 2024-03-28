@@ -2,7 +2,7 @@
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)    
 
 - **School**: Saskatchewan Polytechnic
-- **Class**: CCMP 603 - Fundamentals of Blockchain
+- **Class**: CCMP 601 - Fundamentals of Blockchain
 - **Type**: Assignment
 - **Member**: Le, Trung Hieu
 
@@ -35,9 +35,4 @@ truffle compile
 #### Ganache (default)
 ```
 truffle migrate --network development
-```
-
-## Testing
-```
-truffle test
 ```
