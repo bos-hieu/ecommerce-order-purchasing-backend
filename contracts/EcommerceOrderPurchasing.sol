@@ -467,6 +467,10 @@ contract EcommerceOrderPurchasing is Products, Orders {
     EcommerceOrderPurchasingAbstract ecommerceOrderPurchasing =
     new EcommerceOrderPurchasingImplement();
 
+    event PlaceOrder(string message);
+    event CancelOrder(string message);
+    event IssueRefund(string message);
+
     constructor() {
         // Set the retailer from the deployer of the contract
         ecommerceOrderPurchasing.setRetailer(payable(msg.sender));
@@ -494,6 +498,7 @@ contract EcommerceOrderPurchasing is Products, Orders {
         string memory message = ecommerceOrderPurchasing.placeOrder{
                 value: msg.value
             }(productId, msg.value, payable(msg.sender));
+        emit PlaceOrder(message);
         return message;
     }
 
@@ -510,7 +515,9 @@ contract EcommerceOrderPurchasing is Products, Orders {
         // the {value: msg.value} is used to send the value of the transaction to the cancelOrder function of
         // EcommerceOrderPurchasing. Without this, the transaction maybe failed or the transaction will be sent to address's
         // contract instead of the address's customer.
-        return ecommerceOrderPurchasing.cancelOrder{value: msg.value}(orderID);
+        string memory message = ecommerceOrderPurchasing.cancelOrder{value: msg.value}(orderID);
+        emit CancelOrder(message);
+        return message;
     }
 
     // issueRefund is a public function that is used to issue a refund.
@@ -529,6 +536,7 @@ contract EcommerceOrderPurchasing is Products, Orders {
         (string memory refundMessage, ) = ecommerceOrderPurchasing.issueRefund{
                 value: msg.value
             }(orderID, msg.value);
+        emit IssueRefund(refundMessage);
         return refundMessage;
     }
 }
