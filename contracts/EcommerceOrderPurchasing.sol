@@ -76,7 +76,11 @@ library Utils {
     // string in Ether. Therefore, I added this function to make the code more complete.
     // @param amount (uint256) - The amount to be converted
     // @return (string) - The string of the amount in Ether
-    function uint256ToEthString(uint256 amount) internal pure returns (string memory) {
+    function uint256ToEthString(uint256 amount)
+    internal
+    pure
+    returns (string memory)
+    {
         // Divide by 10^18 to convert from Wei to Ether
         uint256 ethValue = amount / 1 ether;
 
@@ -90,7 +94,11 @@ library Utils {
     // @param value (uint256) - The value to be converted
     // @return (string) - The string of the value
     // reference: https://www.geeksforgeeks.org/type-conversion-in-solidity/
-    function uint256ToString(uint256 value) internal pure returns (string memory) {
+    function uint256ToString(uint256 value)
+    internal
+    pure
+    returns (string memory)
+    {
         // Special case for 0
         if (value == 0) {
             return "0";
@@ -485,7 +493,13 @@ EcommerceOrderPurchasingAbstract
         }
 
         isRefundSuccess = true;
-        return (Utils.concatTwoStrings("You successfully refunded your payment: ", Utils.uint256ToEthString(maxRefundAmount)), isRefundSuccess);
+        return (
+            Utils.concatTwoStrings(
+            "You successfully refunded your payment: ",
+            Utils.uint256ToEthString(maxRefundAmount)
+        ),
+            isRefundSuccess
+        );
     }
 
     // sendEther is a private function that sends ether to an address
@@ -560,7 +574,9 @@ contract EcommerceOrderPurchasing is Products, Orders {
         // the {value: msg.value} is used to send the value of the transaction to the cancelOrder function of
         // EcommerceOrderPurchasing. Without this, the transaction maybe failed or the transaction will be sent to address's
         // contract instead of the address's customer.
-        string memory message = ecommerceOrderPurchasing.cancelOrder{value: msg.value}(orderID);
+        string memory message = ecommerceOrderPurchasing.cancelOrder{
+                value: msg.value
+            }(orderID);
         emit CancelOrder(message);
         return message;
     }
