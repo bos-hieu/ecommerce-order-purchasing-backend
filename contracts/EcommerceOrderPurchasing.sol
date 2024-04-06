@@ -231,6 +231,18 @@ contract Orders {
         // updated in the _orders.
         order.status = newStatus;
     }
+
+    // updateRefundedAmount is a private function that updates the refunded amount of an order.
+    // @param orderID (string) - The order id
+    // @param refundedAmount (uint256) - The refunded amount
+    function updateRefundedAmount(string memory orderID, uint256 refundedAmount)
+    internal
+    {
+        Order storage order = _orders[orderID];
+
+        // Update the refunded amount of the order
+        order.refundedAmount = refundedAmount;
+    }
 }
 
 // Products contract is used to manage the products
@@ -452,7 +464,7 @@ EcommerceOrderPurchasingAbstract
             updateOrderStatus(order.id, OrderStatus.Canceled);
             return "You successfully canceled your order";
         }
-        return refundMessage;
+        return Utils.concatTwoStrings(refundMessage, Utils.uint256ToString(order.refundedAmount));
     }
 
     // issueRefund is an implementation of the issueRefund function of EcommerceOrderPurchasingAbstract
@@ -492,14 +504,13 @@ EcommerceOrderPurchasingAbstract
             return ("Transaction failed", isRefundSuccess);
         }
 
+        // Step 5: Update the refunded amount of the order.
+        // This step is not mentioned in the assignment 2. When interacting with frontend, I think it is neccessary to
+        // update the refunded amount of the order. Therefore, I added this step to make the code more complete.
+        updateRefundedAmount(orderID, refundAmount);
+
         isRefundSuccess = true;
-        return (
-            Utils.concatTwoStrings(
-            "You successfully refunded your payment: ",
-            Utils.uint256ToEthString(maxRefundAmount)
-        ),
-            isRefundSuccess
-        );
+        return ("You successfully refunded your payment", isRefundSuccess);
     }
 
     // sendEther is a private function that sends ether to an address
