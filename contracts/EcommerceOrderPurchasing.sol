@@ -1,5 +1,5 @@
 /*
-  @class: CCMP 603 - Introduction to Smart Contracts - Assignment 2
+  @class: CCMP 603 - Introduction to Smart Contracts - Final Project
   @title: E-commerce Order Purchasing Smart Contract
   @member: Le, Trung Hieu
   @date: March 10, 2024
@@ -27,7 +27,7 @@
 pragma solidity ^0.8.13;
 
 // Utils is a library that contains utility functions for the EcommerceOrderPurchasing system
-// The functions include uint8ToString, concatTwoStrings, and compareTwoStrings
+// The functions include uint8ToString, concatTwoStrings, and compareTwoStrings, uint256ToEthString, uint256ToString
 // reference: https://www.geeksforgeeks.org/solidity-libraries/
 library Utils {
     // uint8ToString is a utility function that converts a uint8 to a string
@@ -69,6 +69,51 @@ library Utils {
             return false;
         }
         return keccak256(abi.encodePacked(a)) == keccak256(abi.encodePacked(b));
+    }
+
+    // uint256ToEthString is a utility function that converts a uint256 to a string in Ether
+    // This function is not mentioned in the assignment 2. However, I think it is necessary to convert the amount to a
+    // string in Ether. Therefore, I added this function to make the code more complete.
+    // @param amount (uint256) - The amount to be converted
+    // @return (string) - The string of the amount in Ether
+    function uint256ToEthString(uint256 amount) internal pure returns (string memory) {
+        // Divide by 10^18 to convert from Wei to Ether
+        uint256 ethValue = amount / 1 ether;
+
+        // Convert the uint256 value to a string
+        string memory ethString = uint256ToString(ethValue);
+
+        return ethString;
+    }
+
+    // uint256ToString is a utility function that converts a uint256 to a string
+    // @param value (uint256) - The value to be converted
+    // @return (string) - The string of the value
+    // reference: https://www.geeksforgeeks.org/type-conversion-in-solidity/
+    function uint256ToString(uint256 value) internal pure returns (string memory) {
+        // Special case for 0
+        if (value == 0) {
+            return "0";
+        }
+
+        // Count the number of digits
+        uint256 temp = value;
+        uint256 digits;
+        while (temp != 0) {
+            digits++;
+            temp /= 10;
+        }
+
+        // Populate the buffer in reverse order
+        bytes memory buffer = new bytes(digits);
+        while (value != 0) {
+            digits--;
+            buffer[digits] = bytes1(uint8(48 + (value % 10)));
+            value /= 10;
+        }
+
+        // Convert the buffer to a string
+        return string(buffer);
     }
 }
 
@@ -421,8 +466,8 @@ EcommerceOrderPurchasingAbstract
         bool isRefundSuccess = false;
         if (refundAmount > maxRefundAmount) {
             // convert maxRefundAmount to string
-            string memory maxRefundAmountStr = string(
-                abi.encodePacked(maxRefundAmount)
+            string memory maxRefundAmountStr = Utils.uint256ToEthString(
+                maxRefundAmount
             );
             return (
                 Utils.concatTwoStrings(
@@ -440,7 +485,7 @@ EcommerceOrderPurchasingAbstract
         }
 
         isRefundSuccess = true;
-        return ("You successfully refunded your payment", isRefundSuccess);
+        return (Utils.concatTwoStrings("You successfully refunded your payment: ", Utils.uint256ToEthString(maxRefundAmount)), isRefundSuccess);
     }
 
     // sendEther is a private function that sends ether to an address
