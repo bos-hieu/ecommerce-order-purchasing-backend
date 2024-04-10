@@ -1,8 +1,8 @@
 /*
-  @class: CCMP 603 - Introduction to Smart Contracts - Final Project
+  @class: CCMP 603 - Introduction to Smart Contracts - Project - Backend
   @title: E-commerce Order Purchasing Smart Contract
   @member: Le, Trung Hieu
-  @date: March 10, 2024
+  @date: April 10, 2024
   @notice: This contract allows customers to purchase products from a retailer.
   @dev: The contract is implemented using Solidity version greater than 0.8.13
 
@@ -346,7 +346,12 @@ abstract contract EcommerceOrderPurchasingAbstract is Products {
     returns (string memory, bool);
 
     // setRetailer is a function that is used to set the retailer
+    // @param (address) - The retailer address
     function setRetailer(address payable) public virtual;
+
+    // getRetailer is a function that returns the retailer address
+    // @return (address) - The retailer address
+    function getRetailer() public view virtual returns (address payable);
 }
 
 // EcommerceOrderPurchasingImplement is a contract that implements the functions of EcommerceOrderPurchasing
@@ -361,12 +366,6 @@ EcommerceOrderPurchasingAbstract
     // issues a refund when an order is canceled or partially refunded.
     // The retailer is set by the setRetailer function.
     address payable retailer;
-
-    // setRetailer is an implementation of the setRetailer function of EcommerceOrderPurchasingAbstract
-    // @param initRetailer (address) - The retailer address to be set
-    function setRetailer(address payable initRetailer) public override {
-        retailer = initRetailer;
-    }
 
     // getProducts is an implementation of the getProducts function of EcommerceOrderPurchasingAbstract
     // @return (Product[3]) - The list of products
@@ -464,7 +463,11 @@ EcommerceOrderPurchasingAbstract
             updateOrderStatus(order.id, OrderStatus.Canceled);
             return "You successfully canceled your order";
         }
-        return Utils.concatTwoStrings(refundMessage, Utils.uint256ToString(order.refundedAmount));
+        return
+            Utils.concatTwoStrings(
+            refundMessage,
+            Utils.uint256ToString(order.refundedAmount)
+        );
     }
 
     // issueRefund is an implementation of the issueRefund function of EcommerceOrderPurchasingAbstract
@@ -513,6 +516,19 @@ EcommerceOrderPurchasingAbstract
         return ("You successfully refunded your payment", isRefundSuccess);
     }
 
+    // setRetailer is an implementation of the setRetailer function of EcommerceOrderPurchasingAbstract
+    // @param initRetailer (address) - The retailer address to be set
+    function setRetailer(address payable initRetailer) public override {
+        retailer = initRetailer;
+    }
+
+    // getRetailer is an implementation of the getRetailer function of EcommerceOrderPurchasingAbstract
+    // This function is not mentioned in the assignment 2. However, I think it is necessary to get the retailer address.
+    // @return (address) - The retailer address
+    function getRetailer() public view override returns (address payable) {
+        return retailer;
+    }
+
     // sendEther is a private function that sends ether to an address
     // @param to (address) - The address to send ether to
     // @param value (uint256) - The value of ether to send
@@ -522,7 +538,7 @@ EcommerceOrderPurchasingAbstract
     payable
     returns (bool)
     {
-        (bool sent, ) = to.call{value: value}("");
+        (bool sent,) = to.call{value: value}("");
         return sent;
     }
 }
@@ -537,9 +553,24 @@ contract EcommerceOrderPurchasing is Products, Orders {
     EcommerceOrderPurchasingAbstract ecommerceOrderPurchasing =
     new EcommerceOrderPurchasingImplement();
 
+    // PlaceOrder is an event that is emitted when an order is placed and includes the message of the result
     event PlaceOrder(string message);
+
+    // CancelOrder is an event that is emitted when an order is canceled and includes the message of the result
     event CancelOrder(string message);
+
+    // IssueRefund is an event that is emitted when a refund is issued and includes the message of the result
     event IssueRefund(string message);
+
+    // onlyRetailerAllowed is a modifier that is used to ensure that only the retailer can call the cancelOrder and
+    // issueRefund functions.
+    modifier onlyRetailerAllowed() {
+        require(
+            msg.sender == ecommerceOrderPurchasing.getRetailer(),
+            "Only retailer can call this function"
+        );
+        _;
+    }
 
     constructor() {
         // Set the retailer from the deployer of the contract
@@ -580,6 +611,7 @@ contract EcommerceOrderPurchasing is Products, Orders {
     function cancelOrder(string memory orderID)
     public
     payable
+    onlyRetailerAllowed
     returns (string memory)
     {
         // the {value: msg.value} is used to send the value of the transaction to the cancelOrder function of
@@ -600,15 +632,23 @@ contract EcommerceOrderPurchasing is Products, Orders {
     function issueRefund(string memory orderID)
     public
     payable
+    onlyRetailerAllowed
     returns (string memory)
     {
         // the {value: msg.value} is used to send the value of the transaction to the issueRefund function of
         // EcommerceOrderPurchasing. Without this, the transaction maybe failed or the transaction will be sent to address's
         // contract instead of the address's customer.
-        (string memory refundMessage, ) = ecommerceOrderPurchasing.issueRefund{
+        (string memory refundMessage,) = ecommerceOrderPurchasing.issueRefund{
                 value: msg.value
             }(orderID, msg.value);
         emit IssueRefund(refundMessage);
         return refundMessage;
+    }
+
+    // getRetailer is a public function that returns the retailer address
+    // It calls the getRetailer function of EcommerceOrderPurchasing
+    // @return (address) - The retailer address
+    function getRetailer() public view returns (address payable) {
+        return ecommerceOrderPurchasing.getRetailer();
     }
 }
