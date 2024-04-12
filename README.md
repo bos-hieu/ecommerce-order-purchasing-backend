@@ -3,7 +3,7 @@
 
 - **School**: Saskatchewan Polytechnic
 - **Class**: CCMP 601 - Fundamentals of Blockchain
-- **Type**: Assignment
+- **Type**: Project
 - **Member**: Le, Trung Hieu
 
 ## Before running
